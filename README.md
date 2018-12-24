@@ -17,3 +17,8 @@
 1. `> code .`
 1. Adjust `build:prod` script in `package.json` to match the sibling `server` repo name.
 
+## Deployment
+
+  ```
+  > npm run build:prod
+  ```
