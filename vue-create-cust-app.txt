@@ -1,0 +1,308 @@
+mkdir public
+mkdir src
+touch README.md
+
+cat > .eslintrc <<- EOF
+{
+  "extends": [
+    "eslint:recommended",
+    "plugin:vue/essential"
+  ],
+  "parserOptions": {
+    "parser": "babel-eslint",
+    "ecmaVersion": 8,
+    "sourceType": "module"
+  },
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "globals": {
+    "process": false
+  },
+  "rules": {
+    "eqeqeq": ["error", "always"],
+    "no-console": "off",
+    "indent": ["error", 2, { "SwitchCase": 1 }],
+    "quotes": ["warn", "single"],
+    "no-multi-spaces": ["error",
+      {
+          "ignoreEOLComments": true
+      }
+    ],
+    "no-trailing-spaces": "off",
+    "new-cap": "error",
+    "no-redeclare": [
+      "error",
+      {
+        "builtinGlobals": true
+      }
+    ],
+    "semi": ["error", "always"],
+    "space-in-parens": ["error"],
+    "space-infix-ops": "error",
+    "object-curly-spacing": ["error", "always"],
+    "comma-spacing": "error",
+    "space-before-function-paren": ["error", "never"],
+    "keyword-spacing": [
+      "error", 
+      { 
+        "before": true, 
+        "after": true,
+        "overrides": {
+          "if": { "after": false },
+          "for": { "after": false },
+          "while": { "after": false },
+          "do": { "after": false },
+          "switch": { "after": false },
+          "catch": { "after": false }
+        } 
+      }
+    ],
+    "array-bracket-spacing": "error"
+  }
+}
+
+EOF
+
+cat > .gitignore <<- EOF
+.DS_Store
+node_modules
+/dist
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw*
+EOF
+
+cat > .travis.yml <<- EOF
+language: "node_js"
+node_js: "10"
+EOF
+
+cat > babel.config.js <<- EOF
+/* eslint-env node */
+module.exports = {
+  presets: [
+    '@vue/app'
+  ]
+};
+EOF
+
+cat > package.json <<- EOF
+{
+  "name": "app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "vue-cli-service build",
+    "build:prod": "npm run build && rm -rf ../project-server/public && cp -R dist ../project-server/public",
+    "lint": "vue-cli-service lint",
+    "serve": "vue-cli-service serve",
+    "start": "npm run serve"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "babel-eslint"
+    }
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie <= 8"
+  ]
+}
+EOF
+
+npm i vue
+npm i vue-router
+npm i @vue/cli-plugin-babel -D
+npm i @vue/cli-plugin-eslint -D
+npm i @vue/cli-service -D
+npm i babel-eslint -D
+npm i eslint -D
+npm i eslint-plugin-vue -D
+npm i postcss-cli -D
+npm i postcss-easy-import -D
+npm i postcss-loader -D
+npm i postcss-nested -D
+npm i postcss-simple-vars -D
+npm i vue-template-compiler -D
+
+cat > vue.config.js <<- EOF
+/* eslint-env node */
+module.exports = {
+  css: {
+    loaderOptions: {
+      postcss: {
+        plugins:
+          [
+            require('postcss-easy-import')(),
+            require('postcss-simple-vars')(),
+            require('autoprefixer')(),
+            require('postcss-nested')()
+          ],
+      } 
+    }
+  },
+  devServer: {
+    proxy: 'http://localhost:3000'
+  }
+};
+EOF
+
+cd public
+
+cat > index.html <<- EOF
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>app</title>
+  </head>
+  <body>
+    <noscript>
+      <strong>We're sorry but project-app doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
+    </noscript>
+    <div id="app"></div>
+    <!-- built files will be auto injected -->
+  </body>
+</html>
+EOF
+
+cd ../src
+mkdir services
+mkdir components
+
+cat > main.css <<- EOF
+body {
+  font-family: "Segoe UI", Candara, "Bitstream Vera Sans", "DejaVu Sans", "Bitstream Vera Sans", "Trebuchet MS", Verdana, "Verdana Ref", sans-serif;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+EOF
+
+cat > main.js <<- EOF
+import Vue from 'vue';
+import VueRouter from 'vue-router';
+import App from './components/App.vue';
+import router from './router';
+import './main.css';
+
+Vue.config.productionTip = false;
+Vue.use(VueRouter);
+
+// Register a global custom directive called \`v-focus\`
+Vue.directive('focus', {
+  // When the bound element is inserted into the DOM...
+  inserted(el) {
+    // Focus the element
+    el.focus();
+  }
+});
+
+new Vue({
+  router,
+  render: h => h(App)
+}).\$mount('#app');
+EOF
+
+cat > router.js <<- EOF
+import VueRouter from 'vue-router';
+import Home from './components/home/Home';
+
+export default new VueRouter({
+  // mode: 'history',
+  routes: [
+    { path: '/', component: Home },
+    { path: '*', redirect: '/' }
+  ]
+});
+EOF
+
+cd components
+mkdir home
+
+cat > App.vue <<- EOF
+<template>
+  <div id="app">
+    <RouterView></RouterView>
+  </div>
+</template>
+
+<script>
+export default {
+
+};
+</script>
+
+<style>
+#app {
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  margin-top: 60px;
+}
+</style>
+EOF
+
+cd home
+
+cat > Home.vue <<- EOF
+<template>
+  <section>
+    <h2>Welcome Home!</h2>
+  </section>
+</template>
+
+<script>
+export default {
+  
+};
+</script>
+
+<style lang="postcss" scoped>
+</style>
+EOF
+
+cd ../../services
+
+cat > api.js <<- EOF
+export default {
+
+};
+EOF
